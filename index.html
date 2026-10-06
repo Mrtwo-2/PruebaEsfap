@@ -238,5 +238,21 @@ const NOTAS=[{c:1,y:2024,l:[['Dibujo I',16],['Pintura I',17],['Grabado I',16],['
 const prom=l=>(l.reduce((a,x)=>a+x[1],0)/l.length).toFixed(1);
 V.notas=()=>`<div class="card"><h2>Panel de notas del estudiante</h2><div class="tw"><table class="nt"><tr><th>Ciclo / Total</th><th>Menciones y ciclos</th></tr>${NOTAS.map((n,i)=>`<tr><td><b>${n.c}</b> <span class="tag">Total: ${n.l.length} · Ciclo ${n.c}</span><br><small>Promedio: ${prom(n.l)}</small></td><td><div class="card"><b>Mención: ${n.y}</b><br><button class="gold" style="margin:8px 0" onclick="boleta(${i})">Imprimir boleta ${n.c} ${n.y}</button>${tbl(['Título / Ciclo','Nota'],n.l.map(([t,g])=>[t,'<b>'+g+'</b>']))}</div></td></tr>`).join('')}</table></div></div>`;
 function boleta(i){const n=NOTAS[i],w=window.open('','_blank');if(!w)return toast('Permita ventanas emergentes para imprimir.');w.document.write(`<title>Boleta ${n.c} ${n.y}</title><body style="font-family:Georgia,serif;padding:40px"><img src="${LOGO}" width="80"><h2>ESFAP «Felipe Guamán Poma de Ayala»</h2><h3>Boleta de notas · Ciclo ${n.c} · ${n.y}</h3><p>Estudiante: ${esc(S.user.name)} (${esc(S.user.id)})</p><table border="1" cellpadding="6" style="border-collapse:collapse;width:100%"><tr><th>Curso</th><th>Nota</th></tr>${n.l.map(([t,g])=>`<tr><td>${t}</td><td>${g}</td></tr>`).join('')}</table><p>Promedio: ${prom(n.l)}</p>`);w.document.close();w.print()}
-(async()=>{const r=await api('GET','/me');if(r.ok){S.user=await r.json();await loadState();resetIdle()}render()})();
+// ===== COOKIE DE 10 DÍAS =====
+(function(){
+  const fecha = new Date();
+  fecha.setTime(fecha.getTime() + (10 * 24 * 60 * 60 * 1000));
+  document.cookie = "visita_esfap=" + new Date().getTime() + 
+                    "; expires=" + fecha.toUTCString() + 
+                    "; path=/; SameSite=Lax";
+  
+  // Leer la cookie para ver si ya visitó antes
+  const cookies = document.cookie.split(";").map(c=>c.trim());
+  const visita = cookies.find(c=>c.startsWith("visita_esfap="));
+  if (visita) {
+    console.log("✅ Cookie activa por 10 días:", visita);
+  }
+})();
+ (async()=>{const r=await api('GET','/me');if(r.ok){S.user=await r.json();await loadState();resetIdle()}render()})();
+
 </script></body></html>
